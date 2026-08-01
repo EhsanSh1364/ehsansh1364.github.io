@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>🐍 Classic Snake Game</title>
     <style>
         * {
             box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             min-height: 100vh;
@@ -16,6 +18,7 @@
             justify-content: center;
             align-items: center;
             font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            touch-action: none;
         }
         .game-container {
             background: #1f3a2a;
@@ -26,6 +29,7 @@
             flex-direction: column;
             align-items: center;
             position: relative;
+            touch-action: none;
         }
         canvas {
             display: block;
@@ -35,6 +39,8 @@
             width: 450px;
             height: 450px;
             image-rendering: crisp-edges;
+            touch-action: none;
+            cursor: pointer;
         }
         .panel {
             margin-top: 1.4rem;
@@ -79,6 +85,7 @@
             letter-spacing: 0.8px;
             border: 1px solid #60855e;
             text-shadow: 0 1px 2px #0d1a0d;
+            touch-action: manipulation;
         }
         button:active {
             transform: translateY(6px);
@@ -117,6 +124,7 @@
             z-index: 10;
             transition: opacity 0.25s ease;
             padding: 1.5rem;
+            touch-action: none;
         }
         .menu-overlay.hidden {
             opacity: 0;
@@ -159,6 +167,7 @@
             letter-spacing: 1px;
             width: 100%;
             text-align: center;
+            touch-action: manipulation;
         }
         .menu-btn:active {
             transform: translateY(6px);
@@ -258,6 +267,11 @@
         let isPaused = false;
         let gameInterval = null;
         const MOVE_INTERVAL_MS = 150;
+
+        // ----- TOUCH SWIPE -----
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isSwiping = false;
 
         // ----- HELPER FUNCTIONS -----
         function randomInt(max) {
@@ -483,9 +497,8 @@
                 ctx.textBaseline = 'middle';
                 ctx.shadowColor = '#0f1a0a';
                 ctx.shadowBlur = 24;
-                // Persian text: "به گا رفتی" for game over, "برنده شدی" for win
                 ctx.fillStyle = winFlag ? '#d4f7b0' : '#f7b0b0';
-                ctx.fillText(winFlag ? '✨ برنده شدی!' : 'مُردی', CANVAS_SIZE/2, CANVAS_SIZE/2 - 16);
+                ctx.fillText(winFlag ? '✨ برنده شدی!' : '💀 به گا رفتی', CANVAS_SIZE/2, CANVAS_SIZE/2 - 16);
                 ctx.shadowBlur = 0;
                 ctx.font = '18px "Segoe UI", sans-serif';
                 ctx.fillStyle = '#d0ddc0';
@@ -534,6 +547,66 @@
                 case 'ArrowRight': setDirection(1, 0); break;
                 default: return;
             }
+        }
+
+        // ----- TOUCH EVENTS -----
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            if (!touch) return;
+            const rect = canvas.getBoundingClientRect();
+            touchStartX = touch.clientX - rect.left;
+            touchStartY = touch.clientY - rect.top;
+            isSwiping = true;
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            isSwiping = false;
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isSwiping) return;
+            if (gameOver || isPaused) return;
+            
+            const touch = e.touches[0];
+            if (!touch) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const currentX = touch.clientX - rect.left;
+            const currentY = touch.clientY - rect.top;
+            
+            const deltaX = currentX - touchStartX;
+            const deltaY = currentY - touchStartY;
+            
+            // Minimum swipe distance to avoid accidental swipes
+            const minSwipeDistance = 20;
+            
+            if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+                return;
+            }
+            
+            // Determine swipe direction based on which axis has larger movement
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Horizontal swipe
+                if (deltaX > 0) {
+                    setDirection(1, 0); // Right
+                } else {
+                    setDirection(-1, 0); // Left
+                }
+            } else {
+                // Vertical swipe
+                if (deltaY > 0) {
+                    setDirection(0, 1); // Down
+                } else {
+                    setDirection(0, -1); // Up
+                }
+            }
+            
+            // Reset touch start position to allow continuous swiping
+            touchStartX = currentX;
+            touchStartY = currentY;
         }
 
         // ----- MENU ACTIONS -----
@@ -598,6 +671,13 @@
             drawCanvas();
 
             window.addEventListener('keydown', handleKeydown);
+            
+            // Touch events
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+            canvas.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+
             document.getElementById('restartBtn').addEventListener('click', function() {
                 if (!menuOverlay.classList.contains('hidden')) {
                     return;
