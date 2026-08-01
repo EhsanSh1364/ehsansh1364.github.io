@@ -173,11 +173,6 @@
             transform: translateY(6px);
             box-shadow: 0 2px 0 #122016, 0 8px 16px rgba(0,0,0,0.5);
         }
-        .menu-btn.quit-btn {
-            background: #4d2b2b;
-            border-color: #9a6a6a;
-            color: #ffe6e6;
-        }
         .menu-btn:focus-visible {
             outline: 2px solid #b3d9a0;
         }
@@ -227,7 +222,6 @@
         </div>
         <div class="menu-buttons">
             <button class="menu-btn" id="newGameBtn">شروع بازی</button>
-            <button class="menu-btn quit-btn" id="quitBtn">بپر بیرون</button>
         </div>
     </div>
 
@@ -254,7 +248,6 @@
         // DOM elements for menu
         const menuOverlay = document.getElementById('menuOverlay');
         const newGameBtn = document.getElementById('newGameBtn');
-        const quitBtn = document.getElementById('quitBtn');
 
         // ----- GAME STATE -----
         let snake = [];
@@ -630,28 +623,6 @@
             canvas.focus();
         }
 
-        // Quit: show menu, stop game, clear interval
-        function quitGame() {
-            if (gameInterval) {
-                clearInterval(gameInterval);
-                gameInterval = null;
-            }
-            gameOver = true;
-            showMenu();
-            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-            ctx.fillStyle = '#1c2b1e';
-            ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-            ctx.font = 'bold 40px sans-serif';
-            ctx.fillStyle = '#4f7a4a';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🐍', CANVAS_SIZE/2, CANVAS_SIZE/2 - 10);
-            ctx.font = '18px sans-serif';
-            ctx.fillStyle = '#6d8f66';
-            ctx.fillText('منوی اصلی', CANVAS_SIZE/2, CANVAS_SIZE/2 + 40);
-            scoreSpan.textContent = '0';
-        }
-
         // ----- INIT -----
         function init() {
             showMenu();
@@ -686,7 +657,6 @@
             });
 
             newGameBtn.addEventListener('click', newGame);
-            quitBtn.addEventListener('click', quitGame);
 
             canvas.setAttribute('tabindex', '0');
             canvas.focus();
@@ -762,27 +732,6 @@
             drawCanvas();
             if (!gameInterval) startLoop();
             canvas.focus();
-        };
-
-        quitGame = function() {
-            if (gameInterval) {
-                clearInterval(gameInterval);
-                gameInterval = null;
-            }
-            gameOver = true;
-            showMenu();
-            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-            ctx.fillStyle = '#1c2b1e';
-            ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-            ctx.font = 'bold 40px sans-serif';
-            ctx.fillStyle = '#4f7a4a';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🐍', CANVAS_SIZE/2, CANVAS_SIZE/2 - 10);
-            ctx.font = '18px sans-serif';
-            ctx.fillStyle = '#6d8f66';
-            ctx.fillText('منوی اصلی', CANVAS_SIZE/2, CANVAS_SIZE/2 + 40);
-            scoreSpan.textContent = '0';
         };
 
         document.getElementById('restartBtn').addEventListener('click', function() {
