@@ -52,6 +52,8 @@
             text-shadow: 0 2px 3px #0f1a0f;
             font-weight: 600;
             letter-spacing: 1px;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
         .score-box {
             background: #0f1f12;
@@ -70,6 +72,7 @@
         .controls {
             display: flex;
             gap: 0.6rem;
+            flex-wrap: wrap;
         }
         button {
             background: #2f4d2f;
@@ -94,16 +97,21 @@
         button:focus-visible {
             outline: 2px solid #b3d9a0;
         }
-        .hint {
-            color: #91ab83;
-            margin-top: 0.4rem;
-            font-size: 0.95rem;
-            font-weight: 400;
-            letter-spacing: 0.3px;
-            background: #162418;
-            padding: 0.25rem 1.8rem;
-            border-radius: 3rem;
-            border: 1px solid #3c5a38;
+        .pause-btn {
+            background: #4d6b3d;
+            border-color: #7a9a6a;
+            min-width: 100px;
+        }
+        .pause-btn.paused {
+            background: #6b5d3d;
+            border-color: #9a8a6a;
+        }
+        .bottom-row {
+            margin-top: 0.6rem;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
         }
 
         /* ----- MAIN MENU OVERLAY ----- */
@@ -207,6 +215,14 @@
                 font-size: 0.9rem;
                 padding: 0.3rem 1rem;
             }
+            .pause-btn {
+                min-width: 70px;
+                font-size: 0.9rem;
+                padding: 0.3rem 0.8rem;
+            }
+            .panel {
+                gap: 0.3rem;
+            }
         }
     </style>
 </head>
@@ -231,7 +247,9 @@
             <button id="restartBtn">دوباره</button>
         </div>
     </div>
-    <div class="hint">⬆ ⬇ ⬅ ➡ &nbsp;·&nbsp; space to pause</div>
+    <div class="bottom-row">
+        <button class="pause-btn" id="pauseBtn">وایستا</button>
+    </div>
 </div>
 
 <script>
@@ -248,6 +266,7 @@
         // DOM elements for menu
         const menuOverlay = document.getElementById('menuOverlay');
         const newGameBtn = document.getElementById('newGameBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
 
         // ----- GAME STATE -----
         let snake = [];
@@ -339,6 +358,8 @@
             gameOver = false;
             winFlag = false;
             isPaused = false;
+            pauseBtn.textContent = 'وایستا';
+            pauseBtn.classList.remove('paused');
             scoreSpan.textContent = '0';
             const foodPlaced = placeFood();
             if (!foodPlaced) {
@@ -497,13 +518,13 @@
                 ctx.fillStyle = '#d0ddc0';
                 ctx.fillText('دوباره', CANVAS_SIZE/2, CANVAS_SIZE/2 + 40);
             } else if (isPaused) {
-                ctx.font = 'bold 32px "Segoe UI", sans-serif';
+                ctx.font = 'bold 36px "Segoe UI", sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#c8ddb0';
                 ctx.shadowBlur = 18;
                 ctx.shadowColor = '#1e3a1e';
-                ctx.fillText('⏸ PAUSED', CANVAS_SIZE/2, CANVAS_SIZE/2);
+                ctx.fillText('⏸ وایستاده', CANVAS_SIZE/2, CANVAS_SIZE/2);
                 ctx.shadowBlur = 0;
             }
         }
@@ -524,15 +545,10 @@
         // ----- KEYBOARD -----
         function handleKeydown(e) {
             const key = e.key;
-            if (key === ' ' || key.startsWith('Arrow')) {
+            if (key.startsWith('Arrow')) {
                 e.preventDefault();
             }
-            if (key === ' ' || key === 'Space') {
-                if (gameOver) return;
-                isPaused = !isPaused;
-                drawCanvas();
-                return;
-            }
+            // Spacebar is now disabled for pause - do nothing
             switch (key) {
                 case 'ArrowUp': setDirection(0, -1); break;
                 case 'ArrowDown': setDirection(0, 1); break;
@@ -573,33 +589,42 @@
             const deltaX = currentX - touchStartX;
             const deltaY = currentY - touchStartY;
             
-            // Minimum swipe distance to avoid accidental swipes
             const minSwipeDistance = 20;
             
             if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
                 return;
             }
             
-            // Determine swipe direction based on which axis has larger movement
             if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                // Horizontal swipe
                 if (deltaX > 0) {
-                    setDirection(1, 0); // Right
+                    setDirection(1, 0);
                 } else {
-                    setDirection(-1, 0); // Left
+                    setDirection(-1, 0);
                 }
             } else {
-                // Vertical swipe
                 if (deltaY > 0) {
-                    setDirection(0, 1); // Down
+                    setDirection(0, 1);
                 } else {
-                    setDirection(0, -1); // Up
+                    setDirection(0, -1);
                 }
             }
             
-            // Reset touch start position to allow continuous swiping
             touchStartX = currentX;
             touchStartY = currentY;
+        }
+
+        // ----- PAUSE TOGGLE -----
+        function togglePause() {
+            if (gameOver) return;
+            isPaused = !isPaused;
+            if (isPaused) {
+                pauseBtn.textContent = 'ادامه';
+                pauseBtn.classList.add('paused');
+            } else {
+                pauseBtn.textContent = 'وایستا';
+                pauseBtn.classList.remove('paused');
+            }
+            drawCanvas();
         }
 
         // ----- MENU ACTIONS -----
@@ -638,6 +663,8 @@
             gameOver = true;
             winFlag = false;
             isPaused = false;
+            pauseBtn.textContent = 'وایستا';
+            pauseBtn.classList.remove('paused');
             scoreSpan.textContent = '0';
             drawCanvas();
 
@@ -657,6 +684,7 @@
             });
 
             newGameBtn.addEventListener('click', newGame);
+            pauseBtn.addEventListener('click', togglePause);
 
             canvas.setAttribute('tabindex', '0');
             canvas.focus();
@@ -684,6 +712,8 @@
                 gameOver = true;
                 winFlag = false;
                 isPaused = false;
+                pauseBtn.textContent = 'وایستا';
+                pauseBtn.classList.remove('paused');
                 scoreSpan.textContent = '0';
                 placeFood();
                 drawCanvas();
@@ -726,6 +756,8 @@
             gameOver = false;
             winFlag = false;
             isPaused = false;
+            pauseBtn.textContent = 'وایستا';
+            pauseBtn.classList.remove('paused');
             scoreSpan.textContent = '0';
             placeFood();
             hideMenu();
