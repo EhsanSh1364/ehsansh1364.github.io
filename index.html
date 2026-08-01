@@ -332,7 +332,7 @@
             <button class="pause-btn" id="pauseBtn">وایستا</button>
         </div>
         <div class="bottom-right">
-            <button class="about-btn" id="aboutBtn">لینک ما</button>
+            <button class="about-btn" id="aboutBtn">ما اینجاییم</button>
         </div>
     </div>
 </div>
@@ -639,14 +639,26 @@
         // ----- KEYBOARD -----
         function handleKeydown(e) {
             const key = e.key;
-            if (key.startsWith('Arrow')) {
+            if (key.startsWith('Arrow') || key === 'w' || key === 'W' || key === 'a' || key === 'A' || 
+                key === 's' || key === 'S' || key === 'd' || key === 'D') {
                 e.preventDefault();
             }
+            
             switch (key) {
+                // Arrow keys
                 case 'ArrowUp': setDirection(0, -1); break;
                 case 'ArrowDown': setDirection(0, 1); break;
                 case 'ArrowLeft': setDirection(-1, 0); break;
                 case 'ArrowRight': setDirection(1, 0); break;
+                // WASD keys
+                case 'w':
+                case 'W': setDirection(0, -1); break;
+                case 's':
+                case 'S': setDirection(0, 1); break;
+                case 'a':
+                case 'A': setDirection(-1, 0); break;
+                case 'd':
+                case 'D': setDirection(1, 0); break;
                 default: return;
             }
         }
