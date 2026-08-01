@@ -3,16 +3,717 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My First Website</title>
-    <link rel="stylesheet" href="style.css">
+    <title>🐍 Classic Snake Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(145deg, #1a2e1f, #0f1a12);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        .game-container {
+            background: #1f3a2a;
+            padding: 2rem 2rem 1.8rem;
+            border-radius: 4rem 4rem 3rem 3rem;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.7), inset 0 0 8px #6a8f6a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            background: #1c2b1e;
+            border-radius: 2.5rem;
+            box-shadow: inset 0 0 0 3px #3a5a3a, 0 12px 18px rgba(0,0,0,0.6);
+            width: 450px;
+            height: 450px;
+            image-rendering: crisp-edges;
+        }
+        .panel {
+            margin-top: 1.4rem;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #d2e8c0;
+            text-shadow: 0 2px 3px #0f1a0f;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .score-box {
+            background: #0f1f12;
+            padding: 0.6rem 1.8rem;
+            border-radius: 4rem;
+            font-size: 1.6rem;
+            box-shadow: inset 0 3px 6px #0b130b, 0 4px 6px #2b472b;
+            backdrop-filter: blur(2px);
+            border: 1px solid #5d7e5a;
+        }
+        .score-box span {
+            color: #f5ffb0;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+        .controls {
+            display: flex;
+            gap: 0.6rem;
+        }
+        button {
+            background: #2f4d2f;
+            border: none;
+            color: #edffe3;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0.5rem 1.6rem;
+            border-radius: 3rem;
+            box-shadow: 0 6px 0 #122016, 0 6px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: 0.08s linear;
+            letter-spacing: 0.8px;
+            border: 1px solid #60855e;
+            text-shadow: 0 1px 2px #0d1a0d;
+        }
+        button:active {
+            transform: translateY(6px);
+            box-shadow: 0 1px 0 #122016, 0 6px 10px rgba(0,0,0,0.4);
+        }
+        button:focus-visible {
+            outline: 2px solid #b3d9a0;
+        }
+        .hint {
+            color: #91ab83;
+            margin-top: 0.4rem;
+            font-size: 0.95rem;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            background: #162418;
+            padding: 0.25rem 1.8rem;
+            border-radius: 3rem;
+            border: 1px solid #3c5a38;
+        }
+
+        /* ----- MAIN MENU OVERLAY ----- */
+        .menu-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(12, 24, 14, 0.82);
+            backdrop-filter: blur(5px);
+            border-radius: 4rem 4rem 3rem 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            z-index: 10;
+            transition: opacity 0.25s ease;
+            padding: 1.5rem;
+        }
+        .menu-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .menu-title {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #daf0c0;
+            text-shadow: 0 6px 12px #0f1f0a;
+            letter-spacing: 2px;
+            margin-bottom: 0.2rem;
+        }
+        .menu-title small {
+            font-size: 1.6rem;
+            display: block;
+            color: #aacb96;
+            font-weight: 400;
+            letter-spacing: 4px;
+        }
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            width: 80%;
+            max-width: 260px;
+        }
+        .menu-btn {
+            background: #2b4d2b;
+            border: 2px solid #6f9a6a;
+            color: #f2ffe6;
+            font-size: 1.6rem;
+            font-weight: 600;
+            padding: 0.8rem 0.5rem;
+            border-radius: 4rem;
+            box-shadow: 0 8px 0 #122016, 0 8px 16px rgba(0,0,0,0.6);
+            cursor: pointer;
+            transition: 0.08s linear;
+            text-shadow: 0 2px 4px #0b150b;
+            letter-spacing: 1px;
+            width: 100%;
+            text-align: center;
+        }
+        .menu-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #122016, 0 8px 16px rgba(0,0,0,0.5);
+        }
+        .menu-btn.quit-btn {
+            background: #4d2b2b;
+            border-color: #9a6a6a;
+            color: #ffe6e6;
+        }
+        .menu-btn:focus-visible {
+            outline: 2px solid #b3d9a0;
+        }
+
+        @media (max-width: 500px) {
+            canvas {
+                width: 320px;
+                height: 320px;
+            }
+            .game-container {
+                padding: 1.2rem;
+                border-radius: 2.8rem;
+            }
+            .menu-overlay {
+                border-radius: 2.8rem;
+            }
+            .menu-title {
+                font-size: 2.4rem;
+            }
+            .menu-title small {
+                font-size: 1.2rem;
+            }
+            .menu-btn {
+                font-size: 1.3rem;
+                padding: 0.6rem 0.5rem;
+            }
+            .score-box {
+                font-size: 1.2rem;
+                padding: 0.3rem 1rem;
+            }
+            button {
+                font-size: 0.9rem;
+                padding: 0.3rem 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Hello, World!</h1>
-        <p>This is my first website, hosted for free.</p>
-        <button id="myButton">Click Me!</button>
-        <p id="message"></p>
+<div class="game-container" id="gameContainer">
+    <canvas id="gameCanvas" width="450" height="450"></canvas>
+
+    <!-- MAIN MENU OVERLAY -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-title">
+            🐍 مار
+            <small>بازی کلاسیک</small>
+        </div>
+        <div class="menu-buttons">
+            <button class="menu-btn" id="newGameBtn">شروع بازی</button>
+            <button class="menu-btn quit-btn" id="quitBtn">بپر بیرون</button>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <div class="panel">
+        <div class="score-box">🍎 <span id="scoreDisplay">0</span></div>
+        <div class="controls">
+            <button id="restartBtn">دوباره</button>
+        </div>
+    </div>
+    <div class="hint">⬆ ⬇ ⬅ ➡ &nbsp;·&nbsp; space to pause</div>
+</div>
+
+<script>
+    (function() {
+        // ----- CONFIG -----
+        const GRID_SIZE = 15;
+        const CELL_SIZE = 30;
+        const CANVAS_SIZE = 450;
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreSpan = document.getElementById('scoreDisplay');
+
+        // DOM elements for menu
+        const menuOverlay = document.getElementById('menuOverlay');
+        const newGameBtn = document.getElementById('newGameBtn');
+        const quitBtn = document.getElementById('quitBtn');
+
+        // ----- GAME STATE -----
+        let snake = [];
+        let food = { x: 7, y: 7 };
+        let direction = { dx: 1, dy: 0 };
+        let nextDirection = { dx: 1, dy: 0 };
+        let score = 0;
+        let gameOver = false;
+        let winFlag = false;
+        let isPaused = false;
+        let gameInterval = null;
+        const MOVE_INTERVAL_MS = 150;
+
+        // ----- HELPER FUNCTIONS -----
+        function randomInt(max) {
+            return Math.floor(Math.random() * max);
+        }
+
+        function placeFood() {
+            if (snake.length >= GRID_SIZE * GRID_SIZE) {
+                winFlag = true;
+                gameOver = true;
+                clearInterval(gameInterval);
+                gameInterval = null;
+                return false;
+            }
+            const occupied = new Set(snake.map(cell => `${cell.x},${cell.y}`));
+            if (occupied.size === GRID_SIZE * GRID_SIZE) {
+                winFlag = true;
+                gameOver = true;
+                clearInterval(gameInterval);
+                gameInterval = null;
+                return false;
+            }
+            let attempts = 0;
+            const maxAttempts = 2000;
+            let newFood = null;
+            while (attempts < maxAttempts) {
+                const fx = randomInt(GRID_SIZE);
+                const fy = randomInt(GRID_SIZE);
+                if (!occupied.has(`${fx},${fy}`)) {
+                    newFood = { x: fx, y: fy };
+                    break;
+                }
+                attempts++;
+            }
+            if (!newFood) {
+                for (let i = 0; i < GRID_SIZE; i++) {
+                    for (let j = 0; j < GRID_SIZE; j++) {
+                        if (!occupied.has(`${i},${j}`)) {
+                            newFood = { x: i, y: j };
+                            break;
+                        }
+                    }
+                    if (newFood) break;
+                }
+            }
+            if (newFood) {
+                food = newFood;
+                return true;
+            } else {
+                gameOver = true;
+                winFlag = true;
+                clearInterval(gameInterval);
+                gameInterval = null;
+                return false;
+            }
+        }
+
+        // Reset game (keeps menu hidden if already hidden)
+        function resetGame() {
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
+            snake = [
+                { x: 7, y: 7 },
+                { x: 6, y: 7 },
+                { x: 5, y: 7 }
+            ];
+            direction = { dx: 1, dy: 0 };
+            nextDirection = { dx: 1, dy: 0 };
+            score = 0;
+            gameOver = false;
+            winFlag = false;
+            isPaused = false;
+            scoreSpan.textContent = '0';
+            const foodPlaced = placeFood();
+            if (!foodPlaced) {
+                food = { x: 10, y: 10 };
+            }
+            drawCanvas();
+            startLoop();
+        }
+
+        // ----- GAME LOOP -----
+        function gameTick() {
+            if (isPaused || gameOver) return;
+
+            direction = { ...nextDirection };
+            const head = snake[0];
+            const newHead = {
+                x: head.x + direction.dx,
+                y: head.y + direction.dy
+            };
+
+            if (newHead.x < 0 || newHead.x >= GRID_SIZE || newHead.y < 0 || newHead.y >= GRID_SIZE) {
+                gameOver = true;
+                clearInterval(gameInterval);
+                gameInterval = null;
+                drawCanvas();
+                return;
+            }
+
+            const isEating = (newHead.x === food.x && newHead.y === food.y);
+            let newSnake = [newHead, ...snake];
+
+            if (isEating) {
+                snake = newSnake;
+                score++;
+                scoreSpan.textContent = score;
+                const success = placeFood();
+                if (!success) {
+                    drawCanvas();
+                    return;
+                }
+            } else {
+                newSnake.pop();
+                snake = newSnake;
+            }
+
+            const headPos = snake[0];
+            for (let i = 1; i < snake.length; i++) {
+                if (snake[i].x === headPos.x && snake[i].y === headPos.y) {
+                    gameOver = true;
+                    clearInterval(gameInterval);
+                    gameInterval = null;
+                    drawCanvas();
+                    return;
+                }
+            }
+
+            drawCanvas();
+            if (snake.length === GRID_SIZE * GRID_SIZE) {
+                winFlag = true;
+                gameOver = true;
+                clearInterval(gameInterval);
+                gameInterval = null;
+                drawCanvas();
+            }
+        }
+
+        // ----- RENDERING -----
+        function drawCanvas() {
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+            ctx.strokeStyle = '#2d462d';
+            ctx.lineWidth = 0.8;
+            for (let i = 0; i <= GRID_SIZE; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * CELL_SIZE, 0);
+                ctx.lineTo(i * CELL_SIZE, CANVAS_SIZE);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i * CELL_SIZE);
+                ctx.lineTo(CANVAS_SIZE, i * CELL_SIZE);
+                ctx.stroke();
+            }
+
+            // food
+            ctx.shadowColor = '#b3ffa0';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = '#e73f3f';
+            ctx.beginPath();
+            ctx.arc(food.x * CELL_SIZE + CELL_SIZE/2, food.y * CELL_SIZE + CELL_SIZE/2, CELL_SIZE/2 - 3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 6;
+            ctx.fillStyle = '#ff7777';
+            ctx.beginPath();
+            ctx.arc(food.x * CELL_SIZE + CELL_SIZE/2 - 4, food.y * CELL_SIZE + CELL_SIZE/2 - 4, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = '#77c46a';
+            ctx.beginPath();
+            ctx.ellipse(food.x * CELL_SIZE + 10, food.y * CELL_SIZE + 6, 5, 7, 0.4, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // snake
+            if (snake.length === 0) return;
+            for (let i = 0; i < snake.length; i++) {
+                const seg = snake[i];
+                const x = seg.x * CELL_SIZE, y = seg.y * CELL_SIZE;
+                const radius = (CELL_SIZE/2) - (i === 0 ? 2 : 3);
+                const gradient = ctx.createRadialGradient(
+                    x + 8, y + 8, 3,
+                    x + 15, y + 15, 18
+                );
+                if (i === 0) {
+                    gradient.addColorStop(0, '#c8f7b0');
+                    gradient.addColorStop(1, '#4d8f4a');
+                } else {
+                    gradient.addColorStop(0, '#a1d68a');
+                    gradient.addColorStop(1, '#2c662c');
+                }
+                ctx.fillStyle = gradient;
+                ctx.shadowColor = '#a0d68e';
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(x + CELL_SIZE/2, y + CELL_SIZE/2, radius, 0, 2 * Math.PI);
+                ctx.fill();
+                if (i === 0) {
+                    ctx.shadowBlur = 2;
+                    ctx.fillStyle = '#f9f9f9';
+                    ctx.beginPath();
+                    ctx.arc(x + 10, y + 10, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(x + 20, y + 10, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.fillStyle = '#1f2a1a';
+                    ctx.beginPath();
+                    ctx.arc(x + 8, y + 8, 2, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(x + 18, y + 8, 2, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            }
+            ctx.shadowBlur = 0;
+
+            if (gameOver) {
+                ctx.font = 'bold 38px "Segoe UI", system-ui, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = '#0f1a0a';
+                ctx.shadowBlur = 24;
+                // Persian text: "به گا رفتی" for game over, "برنده شدی" for win
+                ctx.fillStyle = winFlag ? '#d4f7b0' : '#f7b0b0';
+                ctx.fillText(winFlag ? '✨ برنده شدی!' : 'مُردی', CANVAS_SIZE/2, CANVAS_SIZE/2 - 16);
+                ctx.shadowBlur = 0;
+                ctx.font = '18px "Segoe UI", sans-serif';
+                ctx.fillStyle = '#d0ddc0';
+                ctx.fillText('دوباره', CANVAS_SIZE/2, CANVAS_SIZE/2 + 40);
+            } else if (isPaused) {
+                ctx.font = 'bold 32px "Segoe UI", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#c8ddb0';
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = '#1e3a1e';
+                ctx.fillText('⏸ PAUSED', CANVAS_SIZE/2, CANVAS_SIZE/2);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function startLoop() {
+            if (gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(gameTick, MOVE_INTERVAL_MS);
+        }
+
+        // ----- DIRECTION -----
+        function setDirection(dx, dy) {
+            if (gameOver || isPaused) return;
+            if (direction.dx === -dx && direction.dy === -dy) return;
+            if (snake.length > 1 && direction.dx === -dx && direction.dy === -dy) return;
+            nextDirection = { dx, dy };
+        }
+
+        // ----- KEYBOARD -----
+        function handleKeydown(e) {
+            const key = e.key;
+            if (key === ' ' || key.startsWith('Arrow')) {
+                e.preventDefault();
+            }
+            if (key === ' ' || key === 'Space') {
+                if (gameOver) return;
+                isPaused = !isPaused;
+                drawCanvas();
+                return;
+            }
+            switch (key) {
+                case 'ArrowUp': setDirection(0, -1); break;
+                case 'ArrowDown': setDirection(0, 1); break;
+                case 'ArrowLeft': setDirection(-1, 0); break;
+                case 'ArrowRight': setDirection(1, 0); break;
+                default: return;
+            }
+        }
+
+        // ----- MENU ACTIONS -----
+        function hideMenu() {
+            menuOverlay.classList.add('hidden');
+        }
+
+        function showMenu() {
+            menuOverlay.classList.remove('hidden');
+        }
+
+        // New Game: reset everything, hide menu, start game
+        function newGame() {
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
+            resetGame();
+            hideMenu();
+            if (!gameInterval) startLoop();
+            canvas.focus();
+        }
+
+        // Quit: show menu, stop game, clear interval
+        function quitGame() {
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
+            gameOver = true;
+            showMenu();
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            ctx.fillStyle = '#1c2b1e';
+            ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            ctx.font = 'bold 40px sans-serif';
+            ctx.fillStyle = '#4f7a4a';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🐍', CANVAS_SIZE/2, CANVAS_SIZE/2 - 10);
+            ctx.font = '18px sans-serif';
+            ctx.fillStyle = '#6d8f66';
+            ctx.fillText('منوی اصلی', CANVAS_SIZE/2, CANVAS_SIZE/2 + 40);
+            scoreSpan.textContent = '0';
+        }
+
+        // ----- INIT -----
+        function init() {
+            showMenu();
+            snake = [
+                { x: 7, y: 7 },
+                { x: 6, y: 7 },
+                { x: 5, y: 7 }
+            ];
+            food = { x: 10, y: 10 };
+            direction = { dx: 1, dy: 0 };
+            nextDirection = { dx: 1, dy: 0 };
+            score = 0;
+            gameOver = true;
+            winFlag = false;
+            isPaused = false;
+            scoreSpan.textContent = '0';
+            drawCanvas();
+
+            window.addEventListener('keydown', handleKeydown);
+            document.getElementById('restartBtn').addEventListener('click', function() {
+                if (!menuOverlay.classList.contains('hidden')) {
+                    return;
+                }
+                resetGame();
+            });
+
+            newGameBtn.addEventListener('click', newGame);
+            quitBtn.addEventListener('click', quitGame);
+
+            canvas.setAttribute('tabindex', '0');
+            canvas.focus();
+            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+
+        // override resetGame
+        const originalReset = resetGame;
+        resetGame = function() {
+            if (menuOverlay.classList.contains('hidden')) {
+                originalReset();
+            } else {
+                if (gameInterval) {
+                    clearInterval(gameInterval);
+                    gameInterval = null;
+                }
+                snake = [
+                    { x: 7, y: 7 },
+                    { x: 6, y: 7 },
+                    { x: 5, y: 7 }
+                ];
+                direction = { dx: 1, dy: 0 };
+                nextDirection = { dx: 1, dy: 0 };
+                score = 0;
+                gameOver = true;
+                winFlag = false;
+                isPaused = false;
+                scoreSpan.textContent = '0';
+                placeFood();
+                drawCanvas();
+            }
+        };
+
+        const originalHideMenu = hideMenu;
+        hideMenu = function() {
+            menuOverlay.classList.add('hidden');
+            gameOver = false;
+            if (!gameInterval) {
+                startLoop();
+            }
+            canvas.focus();
+        };
+
+        const originalShowMenu = showMenu;
+        showMenu = function() {
+            menuOverlay.classList.remove('hidden');
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
+            gameOver = true;
+        };
+
+        newGame = function() {
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
+            snake = [
+                { x: 7, y: 7 },
+                { x: 6, y: 7 },
+                { x: 5, y: 7 }
+            ];
+            direction = { dx: 1, dy: 0 };
+            nextDirection = { dx: 1, dy: 0 };
+            score = 0;
+            gameOver = false;
+            winFlag = false;
+            isPaused = false;
+            scoreSpan.textContent = '0';
+            placeFood();
+            hideMenu();
+            drawCanvas();
+            if (!gameInterval) startLoop();
+            canvas.focus();
+        };
+
+        quitGame = function() {
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
+            gameOver = true;
+            showMenu();
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            ctx.fillStyle = '#1c2b1e';
+            ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            ctx.font = 'bold 40px sans-serif';
+            ctx.fillStyle = '#4f7a4a';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🐍', CANVAS_SIZE/2, CANVAS_SIZE/2 - 10);
+            ctx.font = '18px sans-serif';
+            ctx.fillStyle = '#6d8f66';
+            ctx.fillText('منوی اصلی', CANVAS_SIZE/2, CANVAS_SIZE/2 + 40);
+            scoreSpan.textContent = '0';
+        };
+
+        document.getElementById('restartBtn').addEventListener('click', function() {
+            if (!menuOverlay.classList.contains('hidden')) {
+                return;
+            }
+            resetGame();
+        });
+
+        init();
+    })();
+</script>
 </body>
 </html>
