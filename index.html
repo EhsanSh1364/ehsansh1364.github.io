@@ -22,8 +22,8 @@
         }
         .game-container {
             background: #1f3a2a;
-            padding: 2rem 2rem 1.8rem;
-            border-radius: 4rem 4rem 3rem 3rem;
+            padding: 1.5rem 1.5rem 1.2rem;
+            border-radius: 1.5rem;
             box-shadow: 0 20px 30px rgba(0,0,0,0.7), inset 0 0 8px #6a8f6a;
             display: flex;
             flex-direction: column;
@@ -31,25 +31,19 @@
             position: relative;
             touch-action: none;
         }
-        .canvas-wrapper {
-            border-radius: 2.5rem;
-            overflow: hidden;
-            box-shadow: inset 0 0 0 3px #3a5a3a, 0 12px 18px rgba(0,0,0,0.6);
-            padding: 12px;
-            background: #1c2b1e;
-        }
         canvas {
             display: block;
             background: #1c2b1e;
+            border-radius: 0.8rem;
+            box-shadow: inset 0 0 0 3px #3a5a3a, 0 12px 18px rgba(0,0,0,0.6);
             width: 450px;
             height: 450px;
             image-rendering: crisp-edges;
             touch-action: none;
             cursor: pointer;
-            border-radius: 2.5rem;
         }
         .panel {
-            margin-top: 1.4rem;
+            margin-top: 1rem;
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -63,9 +57,9 @@
         }
         .score-box {
             background: #0f1f12;
-            padding: 0.6rem 1.8rem;
-            border-radius: 4rem;
-            font-size: 1.6rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 3rem;
+            font-size: 1.5rem;
             box-shadow: inset 0 3px 6px #0b130b, 0 4px 6px #2b472b;
             backdrop-filter: blur(2px);
             border: 1px solid #5d7e5a;
@@ -77,36 +71,71 @@
         }
         .controls {
             display: flex;
-            gap: 0.6rem;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
-        button {
+        .controls button {
             background: #2f4d2f;
             border: none;
             color: #edffe3;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
-            padding: 0.5rem 1.6rem;
-            border-radius: 3rem;
-            box-shadow: 0 6px 0 #122016, 0 6px 10px rgba(0,0,0,0.5);
+            padding: 0.4rem 1.2rem;
+            border-radius: 2.5rem;
+            box-shadow: 0 5px 0 #122016, 0 5px 10px rgba(0,0,0,0.5);
             cursor: pointer;
             transition: 0.08s linear;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.5px;
             border: 1px solid #60855e;
             text-shadow: 0 1px 2px #0d1a0d;
             touch-action: manipulation;
         }
-        button:active {
-            transform: translateY(6px);
-            box-shadow: 0 1px 0 #122016, 0 6px 10px rgba(0,0,0,0.4);
+        .controls button:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #122016, 0 5px 10px rgba(0,0,0,0.4);
         }
-        button:focus-visible {
-            outline: 2px solid #b3d9a0;
+        .bottom-row {
+            margin-top: 0.6rem;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .bottom-center {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            margin-right: -90px;
+        }
+        .bottom-right {
+            display: flex;
+            align-items: center;
         }
         .pause-btn {
             background: #4d6b3d;
             border-color: #7a9a6a;
-            min-width: 100px;
+            border: none;
+            color: #edffe3;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.4rem 1.2rem;
+            border-radius: 2.5rem;
+            box-shadow: 0 5px 0 #122016, 0 5px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: 0.08s linear;
+            letter-spacing: 0.5px;
+            border: 1px solid #7a9a6a;
+            text-shadow: 0 1px 2px #0d1a0d;
+            touch-action: manipulation;
+            min-width: 80px;
+        }
+        .pause-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #122016, 0 5px 10px rgba(0,0,0,0.4);
         }
         .pause-btn.paused {
             background: #6b5d3d;
@@ -115,17 +144,44 @@
         .about-btn {
             background: #3d4d6b;
             border-color: #6a7a9a;
-            min-width: 80px;
+            border: none;
+            color: #edffe3;
             font-size: 0.95rem;
+            font-weight: 600;
             padding: 0.4rem 1.2rem;
+            border-radius: 2.5rem;
+            box-shadow: 0 5px 0 #122016, 0 5px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: 0.08s linear;
+            letter-spacing: 0.5px;
+            border: 1px solid #6a7a9a;
+            text-shadow: 0 1px 2px #0d1a0d;
+            touch-action: manipulation;
+            min-width: 70px;
         }
-        .bottom-row {
-            margin-top: 0.6rem;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 0.6rem;
-            flex-wrap: wrap;
+        .about-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #122016, 0 5px 10px rgba(0,0,0,0.4);
+        }
+        .restart-btn {
+            background: #2f4d2f;
+            border: none;
+            color: #edffe3;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.4rem 1.2rem;
+            border-radius: 2.5rem;
+            box-shadow: 0 5px 0 #122016, 0 5px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: 0.08s linear;
+            letter-spacing: 0.5px;
+            border: 1px solid #60855e;
+            text-shadow: 0 1px 2px #0d1a0d;
+            touch-action: manipulation;
+        }
+        .restart-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #122016, 0 5px 10px rgba(0,0,0,0.4);
         }
 
         /* ----- MAIN MENU OVERLAY ----- */
@@ -135,9 +191,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(12, 24, 14, 0.82);
+            background: rgba(12, 24, 14, 0.85);
             backdrop-filter: blur(5px);
-            border-radius: 4rem 4rem 3rem 3rem;
+            border-radius: 1.5rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -181,7 +237,7 @@
             font-size: 1.6rem;
             font-weight: 600;
             padding: 0.8rem 0.5rem;
-            border-radius: 4rem;
+            border-radius: 3.5rem;
             box-shadow: 0 8px 0 #122016, 0 8px 16px rgba(0,0,0,0.6);
             cursor: pointer;
             transition: 0.08s linear;
@@ -200,59 +256,61 @@
         }
 
         @media (max-width: 500px) {
-            .canvas-wrapper {
-                padding: 8px;
-            }
             canvas {
                 width: 320px;
                 height: 320px;
             }
             .game-container {
-                padding: 1.2rem;
-                border-radius: 2.8rem;
+                padding: 0.8rem;
+                border-radius: 1rem;
             }
             .menu-overlay {
-                border-radius: 2.8rem;
+                border-radius: 1rem;
             }
             .menu-title {
-                font-size: 2.4rem;
+                font-size: 2.2rem;
             }
             .menu-title small {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
             }
             .menu-btn {
                 font-size: 1.3rem;
                 padding: 0.6rem 0.5rem;
             }
             .score-box {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
                 padding: 0.3rem 1rem;
             }
-            button {
-                font-size: 0.9rem;
-                padding: 0.3rem 1rem;
+            .controls button, .pause-btn, .about-btn, .restart-btn {
+                font-size: 0.85rem;
+                padding: 0.3rem 0.8rem;
+                min-width: 60px;
             }
             .pause-btn {
-                min-width: 70px;
-                font-size: 0.9rem;
-                padding: 0.3rem 0.8rem;
+                min-width: 60px;
             }
             .about-btn {
-                min-width: 60px;
+                min-width: 55px;
                 font-size: 0.8rem;
-                padding: 0.3rem 0.8rem;
             }
             .panel {
                 gap: 0.3rem;
+                margin-top: 0.6rem;
+            }
+            .bottom-row {
+                margin-top: 0.4rem;
+                gap: 0.3rem;
+            }
+            .bottom-center {
+                gap: 0.3rem;
+                margin-right: 50px;
             }
         }
     </style>
 </head>
 <body>
 <div class="game-container" id="gameContainer">
-    <div class="canvas-wrapper">
-        <canvas id="gameCanvas" width="450" height="450"></canvas>
-    </div>
+    <canvas id="gameCanvas" width="450" height="450"></canvas>
 
     <!-- MAIN MENU OVERLAY -->
     <div class="menu-overlay" id="menuOverlay">
@@ -267,13 +325,15 @@
 
     <div class="panel">
         <div class="score-box">🍎 <span id="scoreDisplay">0</span></div>
-        <div class="controls">
-            <button id="restartBtn">دوباره</button>
-        </div>
     </div>
     <div class="bottom-row">
-        <button class="pause-btn" id="pauseBtn">وایستا</button>
-        <button class="about-btn" id="aboutBtn">درباره</button>
+        <div class="bottom-center">
+            <button class="restart-btn" id="restartBtn">دوباره</button>
+            <button class="pause-btn" id="pauseBtn">وایستا</button>
+        </div>
+        <div class="bottom-right">
+            <button class="about-btn" id="aboutBtn">لینک ما</button>
+        </div>
     </div>
 </div>
 
@@ -283,7 +343,6 @@
         const GRID_SIZE = 15;
         const CELL_SIZE = 30;
         const CANVAS_SIZE = 450;
-        const MARGIN = 12; // Safe margin to prevent cropping at rounded edges
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -294,6 +353,7 @@
         const newGameBtn = document.getElementById('newGameBtn');
         const pauseBtn = document.getElementById('pauseBtn');
         const aboutBtn = document.getElementById('aboutBtn');
+        const restartBtn = document.getElementById('restartBtn');
 
         // ----- GAME STATE -----
         let snake = [];
@@ -457,11 +517,10 @@
         function drawCanvas() {
             ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-            // Draw a subtle background with safe margin awareness
             ctx.fillStyle = '#1c2b1e';
             ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-            // Grid lines - offset by margin
+            // Grid lines
             ctx.strokeStyle = '#2d462d';
             ctx.lineWidth = 0.8;
             for (let i = 0; i <= GRID_SIZE; i++) {
@@ -475,13 +534,6 @@
                 ctx.lineTo(CANVAS_SIZE, pos);
                 ctx.stroke();
             }
-
-            // Draw a subtle border inset to show safe area
-            ctx.strokeStyle = 'rgba(58, 90, 58, 0.3)';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([4, 8]);
-            ctx.strokeRect(MARGIN, MARGIN, CANVAS_SIZE - MARGIN * 2, CANVAS_SIZE - MARGIN * 2);
-            ctx.setLineDash([]);
 
             // food
             ctx.shadowColor = '#b3ffa0';
@@ -590,7 +642,6 @@
             if (key.startsWith('Arrow')) {
                 e.preventDefault();
             }
-            // Spacebar is now disabled for pause - do nothing
             switch (key) {
                 case 'ArrowUp': setDirection(0, -1); break;
                 case 'ArrowDown': setDirection(0, 1); break;
@@ -723,7 +774,7 @@
             canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
             canvas.addEventListener('touchcancel', handleTouchEnd, { passive: false });
 
-            document.getElementById('restartBtn').addEventListener('click', function() {
+            restartBtn.addEventListener('click', function() {
                 if (!menuOverlay.classList.contains('hidden')) {
                     return;
                 }
@@ -813,13 +864,6 @@
             if (!gameInterval) startLoop();
             canvas.focus();
         };
-
-        document.getElementById('restartBtn').addEventListener('click', function() {
-            if (!menuOverlay.classList.contains('hidden')) {
-                return;
-            }
-            resetGame();
-        });
 
         init();
     })();
