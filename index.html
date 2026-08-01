@@ -106,12 +106,20 @@
             background: #6b5d3d;
             border-color: #9a8a6a;
         }
+        .about-btn {
+            background: #3d4d6b;
+            border-color: #6a7a9a;
+            min-width: 80px;
+            font-size: 0.95rem;
+            padding: 0.4rem 1.2rem;
+        }
         .bottom-row {
             margin-top: 0.6rem;
             width: 100%;
             display: flex;
             justify-content: center;
             gap: 0.6rem;
+            flex-wrap: wrap;
         }
 
         /* ----- MAIN MENU OVERLAY ----- */
@@ -220,6 +228,11 @@
                 font-size: 0.9rem;
                 padding: 0.3rem 0.8rem;
             }
+            .about-btn {
+                min-width: 60px;
+                font-size: 0.8rem;
+                padding: 0.3rem 0.8rem;
+            }
             .panel {
                 gap: 0.3rem;
             }
@@ -249,6 +262,7 @@
     </div>
     <div class="bottom-row">
         <button class="pause-btn" id="pauseBtn">وایستا</button>
+        <button class="about-btn" id="aboutBtn">درباره</button>
     </div>
 </div>
 
@@ -267,6 +281,7 @@
         const menuOverlay = document.getElementById('menuOverlay');
         const newGameBtn = document.getElementById('newGameBtn');
         const pauseBtn = document.getElementById('pauseBtn');
+        const aboutBtn = document.getElementById('aboutBtn');
 
         // ----- GAME STATE -----
         let snake = [];
@@ -627,6 +642,11 @@
             drawCanvas();
         }
 
+        // ----- ABOUT BUTTON -----
+        function openAbout() {
+            window.open('https://t.me/EAshams', '_blank');
+        }
+
         // ----- MENU ACTIONS -----
         function hideMenu() {
             menuOverlay.classList.add('hidden');
@@ -685,6 +705,7 @@
 
             newGameBtn.addEventListener('click', newGame);
             pauseBtn.addEventListener('click', togglePause);
+            aboutBtn.addEventListener('click', openAbout);
 
             canvas.setAttribute('tabindex', '0');
             canvas.focus();
