@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی‌های من</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0f0f1f, #1a1a2e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 20px;
+        }
+        .menu-container {
+            background: #16213e;
+            padding: 2.5rem 2rem;
+            border-radius: 3rem;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.8);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .menu-title {
+            color: #e0e0e0;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .menu-subtitle {
+            color: #8888aa;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #2a2a4a;
+            padding-bottom: 1rem;
+        }
+        .game-card {
+            background: #0f3460;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 8px 0 #0a1a30;
+            text-decoration: none;
+            display: block;
+        }
+        .game-card:hover {
+            transform: translateY(-4px);
+            border-color: #4a7a9a;
+            box-shadow: 0 12px 0 #0a1a30;
+        }
+        .game-card:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #0a1a30;
+        }
+        .game-card .icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .game-card .name {
+            color: #f0f0f0;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        .game-card .desc {
+            color: #8899bb;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        .game-card.snake {
+            background: #1a3a2a;
+            border-color: #2a6a4a;
+        }
+        .game-card.synonym {
+            background: #2a1a3a;
+            border-color: #5a2a7a;
+        }
+        .footer-text {
+            color: #555577;
+            font-size: 0.75rem;
+            margin-top: 1.2rem;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <div class="menu-title">🎮 بازی‌های من</div>
+        <div class="menu-subtitle">یکی رو انتخاب کن</div>
+
+        <a href="snake.html" class="game-card snake">
+            <span class="icon">🐍</span>
+            <div class="name">بازی مار</div>
+            <div class="desc">بازی کلاسیک مار با گرافیک زیبا</div>
+        </a>
+
+        <a href="synonym.html" class="game-card synonym">
+            <span class="icon">📚</span>
+            <div class="name">کلمات مترادف</div>
+            <div class="desc">کلمه درست رو پیدا کن و امتیاز بگیر</div>
+        </a>
+
+        <div class="footer-text">💡 ساخته شده با ❤️ توسط Ehsan</div>
+    </div>
+</body>
+</html>
