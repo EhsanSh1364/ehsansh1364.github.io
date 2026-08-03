@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بازی کلمات مترادف</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            touch-action: pan-y;
+        }
+        .game-wrapper {
+            background: #16213e;
+            padding: 14px;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 100vw;
+        }
+        .game-container {
+            background: #0f3460;
+            border-radius: 28px;
+            padding: 12px;
+            box-shadow: inset 0 -4px 0 #0a1a30;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 360 / 540;
+            background:#3d3d3d;
+            border-radius: 20px;
+            touch-action: none;
+            cursor: pointer;
+        }
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 6px 2px;
+            color: #e0e0e0;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .score-badge {
+            background: #1a1a3e;
+            padding: 5px 16px;
+            border-radius: 40px;
+            font-size: 1.05rem;
+            box-shadow: inset 0 -3px 0 #0a0a1e;
+            color: #f0f0f0;
+            border: 1px solid #4a4a7a;
+        }
+        .reset-btn {
+            background: #e94560;
+            border: none;
+            border-radius: 40px;
+            padding: 7px 18px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #fff;
+            box-shadow: 0 5px 0 #8a1a2e, 0 6px 12px rgba(0,0,0,0.4);
+            transition: 0.07s ease;
+            cursor: pointer;
+            touch-action: manipulation;
+            letter-spacing: 0.5px;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        .reset-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #8a1a2e;
+        }
+        .hint {
+            color: #8888aa;
+            font-size: 0.75rem;
+            padding: 3px 8px 0;
+            text-align: center;
+            opacity: 0.8;
+        }
+        .title-text {
+            color: #e0e0e0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .email-btn {
+            background: #4a6a8a;
+            border: none;
+            border-radius: 40px;
+            padding: 9px 26px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #fff;
+            box-shadow: 0 4px 0 #2a4a6a, 0 6px 12px rgba(0,0,0,0.4);
+            transition: 0.07s ease;
+            cursor: pointer;
+            touch-action: manipulation;
+            margin-top: 10px;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        .email-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #2a4a6a;
+        }
+        .email-popup {
+            display: none;
+            background: #1a1a3e;
+            color: #e0e0e0;
+            padding: 10px 20px;
+            border-radius: 12px;
+            margin-top: 8px;
+            border: 1px solid #4a4a7a;
+            font-size: 0.95rem;
+            direction: ltr;
+            text-align: center;
+        }
+        .email-popup.show {
+            display: block;
+        }
+        @media (max-width: 420px) {
+            .game-wrapper { padding: 10px; }
+            .reset-btn { padding: 6px 14px; font-size: 0.95rem; }
+            .title-text { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="title-text">🎮 بازی کلمات مترادف</div>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="360" height="540"></canvas>
+        <div class="info-panel">
+            <span class="score-badge" id="scoreDisplay">🏆 ۰</span>
+            <button class="reset-btn" id="resetButton">دوباره برو</button>
+        </div>
+        <div class="hint">← سوایپ چپ · سوایپ راست →</div>
+    </div>
+    <button class="email-btn" id="emailButton">📧 تماس</button>
+    <div class="email-popup" id="emailPopup">shamsehsan1364@gmail.com</div>
+</div>
+<script>
+    (function(){
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreSpan = document.getElementById('scoreDisplay');
+        const emailPopup = document.getElementById('emailPopup');
+        const emailBtn = document.getElementById('emailButton');
+
+        // ---------- sound system with simple music ----------
+        let audioCtx = null;
+        let musicInterval = null;
+        let musicRunning = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Simple melody: ascending arpeggio
+        const MELODY = [
+            { note: 523, duration: 0.15 },
+            { note: 659, duration: 0.15 },
+            { note: 784, duration: 0.15 },
+            { note: 1047, duration: 0.2 },
+            { note: 784, duration: 0.15 },
+            { note: 659, duration: 0.15 },
+            { note: 523, duration: 0.2 },
+        ];
+
+        let currentMelodyIndex = 0;
+
+        function playMusicNote() {
+            try {
+                if (!audioCtx || audioCtx.state === 'closed') return;
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                
+                const note = MELODY[currentMelodyIndex];
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(note.note, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + note.duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + note.duration);
+                
+                currentMelodyIndex = (currentMelodyIndex + 1) % MELODY.length;
+            } catch(e) { /* silent fail */ }
+        }
+
+        function startMusic() {
+            try {
+                initAudio();
+                if (musicRunning) return;
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                
+                musicRunning = true;
+                currentMelodyIndex = 0;
+                
+                setTimeout(() => {
+                    if (musicRunning) {
+                        playMusicNote();
+                        musicInterval = setInterval(() => {
+                            if (musicRunning && audioCtx && audioCtx.state === 'running') {
+                                playMusicNote();
+                            } else if (musicRunning) {
+                                if (audioCtx && audioCtx.state === 'suspended') {
+                                    audioCtx.resume();
+                                }
+                            }
+                        }, 450);
+                    }
+                }, 300);
+            } catch(e) { /* silent fail */ }
+        }
+
+        function stopMusic() {
+            musicRunning = false;
+            if (musicInterval) {
+                clearInterval(musicInterval);
+                musicInterval = null;
+            }
+        }
+
+        function playTone(freq, duration, type = 'sine', volume = 0.3) {
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) { /* silent fail */ }
+        }
+
+        function soundCorrect() {
+            playTone(523, 0.12, 'sine', 0.25);
+            setTimeout(() => playTone(659, 0.12, 'sine', 0.25), 100);
+            setTimeout(() => playTone(784, 0.18, 'sine', 0.3), 200);
+        }
+
+        function soundWrong() {
+            playTone(300, 0.3, 'sawtooth', 0.2);
+            setTimeout(() => playTone(200, 0.4, 'sawtooth', 0.2), 150);
+        }
+
+        function soundMove() {
+            playTone(600, 0.05, 'sine', 0.1);
+        }
+
+        function soundGameOver() {
+            stopMusic();
+            playTone(400, 0.2, 'square', 0.15);
+            setTimeout(() => playTone(300, 0.2, 'square', 0.15), 200);
+            setTimeout(() => playTone(200, 0.4, 'square', 0.2), 400);
+        }
+
+        // ---------- word bank ----------
+        const PAIRS = [
+            { word: 'happy', synonyms: ['joyful', 'cheerful', 'glad'] },
+            { word: 'big', synonyms: ['large', 'huge', 'enormous'] },
+            { word: 'small', synonyms: ['tiny', 'little', 'compact'] },
+            { word: 'fast', synonyms: ['quick', 'rapid', 'swift'] },
+            { word: 'slow', synonyms: ['gradual', 'sluggish', 'unhurried'] },
+            { word: 'bright', synonyms: ['luminous', 'vivid', 'radiant'] },
+            { word: 'dark', synonyms: ['dim', 'shadowy', 'obscure'] },
+            { word: 'strong', synonyms: ['powerful', 'mighty', 'sturdy'] },
+            { word: 'weak', synonyms: ['fragile', 'feeble', 'frail'] },
+            { word: 'hot', synonyms: ['warm', 'scorching', 'fiery'] },
+            { word: 'cold', synonyms: ['chilly', 'freezing', 'frosty'] },
+            { word: 'easy', synonyms: ['simple', 'effortless', 'straightforward'] },
+            { word: 'hard', synonyms: ['difficult', 'tough', 'challenging'] },
+            { word: 'clean', synonyms: ['pure', 'spotless', 'immaculate'] },
+            { word: 'dirty', synonyms: ['filthy', 'grimy', 'soiled'] },
+            { word: 'new', synonyms: ['fresh', 'novel', 'original'] },
+            { word: 'old', synonyms: ['ancient', 'antique', 'vintage'] },
+            { word: 'angry', synonyms: ['furious', 'irate', 'enraged'] },
+            { word: 'calm', synonyms: ['peaceful', 'tranquil', 'serene'] },
+            { word: 'brave', synonyms: ['courageous', 'heroic', 'fearless'] }
+        ];
+
+        // ---------- game state ----------
+        const LANE_COUNT = 3;
+        const CAR_WIDTH = 44;
+        const CAR_HEIGHT = 52;
+        const BLOCK_WIDTH = 62;
+        const BLOCK_HEIGHT = 40;
+        const ROAD_LEFT = 30;
+        const LANE_CENTERS = [90,180,270];
+
+        let carLane = 1;
+        let carY = 420;          // adjusted for shorter canvas
+
+        let obstacles = [];
+        let currentPair = null;
+        let targetWord = '';
+        let synonymSet = [];
+        let score = 0;
+
+        let gameOver = false;
+        let winFlag = false;
+        let waitingForNext = false;
+
+        const BASE_SPEED = 0.8;
+        let speed = BASE_SPEED;
+
+        // Road scroll offset (moves downward to create upward-car illusion)
+        let roadOffset = 0;
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isSwiping = false;
+
+        // ---------- helpers ----------
+        function randomPair() {
+            return PAIRS[Math.floor(Math.random() * PAIRS.length)];
+        }
+
+        function buildObstacleSet(pair) {
+            const correctWord = pair.synonyms[Math.floor(Math.random() * pair.synonyms.length)];
+            const allSynonyms = PAIRS.flatMap(p => p.synonyms);
+            const candidates = allSynonyms.filter(s => s !== correctWord);
+            const shuffled = candidates.sort(() => Math.random() - 0.5);
+            const wrongs = [];
+            for (let i = 0; i < shuffled.length && wrongs.length < 2; i++) {
+                if (!wrongs.includes(shuffled[i])) wrongs.push(shuffled[i]);
+            }
+            while (wrongs.length < 2) {
+                const fallback = ['unknown', 'mystery'];
+                if (!wrongs.includes(fallback[wrongs.length])) wrongs.push(fallback[wrongs.length]);
+            }
+            const laneWords = [correctWord, wrongs[0], wrongs[1]];
+            for (let i = laneWords.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [laneWords[i], laneWords[j]] = [laneWords[j], laneWords[i]];
+            }
+            return {
+                correctWord: correctWord,
+                laneWords: laneWords,
+            };
+        }
+
+        function spawnNewRound() {
+            currentPair = randomPair();
+            targetWord = currentPair.word;
+
+            const set = buildObstacleSet(currentPair);
+            synonymSet = set.laneWords;
+
+            const startY = 40;
+            obstacles = [];
+            for (let lane = 0; lane < LANE_COUNT; lane++) {
+                const x = LANE_CENTERS[lane] - BLOCK_WIDTH/2;
+                obstacles.push({
+                    lane: lane,
+                    x: x,
+                    y: startY,
+                    width: BLOCK_WIDTH,
+                    height: BLOCK_HEIGHT,
+                    label: synonymSet[lane],
+                    isCorrect: (synonymSet[lane] === set.correctWord),
+                    active: true,
+                });
+            }
+            winFlag = false;
+            waitingForNext = false;
+            speed = BASE_SPEED + Math.min(score * 0.04, 1.2);
+        }
+
+        function resetGame() {
+            gameOver = false;
+            winFlag = false;
+            waitingForNext = false;
+            score = 0;
+            scoreSpan.textContent = '🏆 ۰';
+            speed = BASE_SPEED;
+            carLane = 1;
+            roadOffset = 0;
+            spawnNewRound();
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            if (!gameOver && !winFlag) {
+                startMusic();
+            }
+        }
+
+        // ---------- collision ----------
+        function checkCollision() {
+            if (gameOver || winFlag || waitingForNext) return false;
+
+            const carRect = {
+                x: LANE_CENTERS[carLane] - CAR_WIDTH/2,
+                y: carY - CAR_HEIGHT/2 + 4,
+                w: CAR_WIDTH,
+                h: CAR_HEIGHT - 8,
+            };
+
+            for (let obs of obstacles) {
+                if (!obs.active) continue;
+                if (obs.lane !== carLane) continue;
+
+                const obsRect = {
+                    x: obs.x + 4,
+                    y: obs.y + 4,
+                    w: obs.width - 8,
+                    h: obs.height - 6,
+                };
+
+                if (carRect.x < obsRect.x + obsRect.w &&
+                    carRect.x + carRect.w > obsRect.x &&
+                    carRect.y < obsRect.y + obsRect.h &&
+                    carRect.y + carRect.h > obsRect.y) {
+
+                    if (obs.isCorrect) {
+                        obs.active = false;
+                        winFlag = true;
+                        waitingForNext = true;
+                        score++;
+                        scoreSpan.textContent = '🏆 ' + score;
+                        soundCorrect();
+                        return true;
+                    } else {
+                        gameOver = true;
+                        winFlag = false;
+                        waitingForNext = false;
+                        soundWrong();
+                        setTimeout(soundGameOver, 300);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function updateObstacles() {
+            if (gameOver || winFlag || waitingForNext) return;
+
+            // Scroll the road downward (illusion of car moving up)
+            roadOffset += speed;
+            if (roadOffset > 1000) roadOffset -= 1000;
+
+            for (let obs of obstacles) {
+                if (!obs.active) continue;
+                obs.y += speed;
+                if (obs.y > canvas.height + 50) {
+                    obs.active = false;
+                }
+            }
+
+            const anyActive = obstacles.some(o => o.active === true);
+            if (!anyActive && !gameOver && !winFlag && !waitingForNext) {
+                winFlag = true;
+                waitingForNext = true;
+                score++;
+                scoreSpan.textContent = '🏆 ' + score;
+                soundCorrect();
+            }
+        }
+
+        // ---------- drawing ----------
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Road background (static gradient)
+            let g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            g.addColorStop(0, '#555');
+            g.addColorStop(1, '#2b2b2b');
+            ctx.fillStyle = g;
+            ctx.fillRect(40, 0, 280, canvas.height);
+
+            // Subtle lane markers (scrolling downward)
+            ctx.strokeStyle = 'rgba(200,200,200,0.35)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([16, 22]);
+            ctx.lineDashOffset = -roadOffset * 0.9;
+            ctx.beginPath();
+            ctx.moveTo(135, 0);
+            ctx.lineTo(135, canvas.height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(225, 0);
+            ctx.lineTo(225, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.lineDashOffset = 0;
+
+            // Soft road edge lines
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(40, 0);
+            ctx.lineTo(40, canvas.height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(320, 0);
+            ctx.lineTo(320, canvas.height);
+            ctx.stroke();
+
+            // Draw obstacles - all neutral color
+            for (let obs of obstacles) {
+                if (!obs.active) continue;
+                const x = obs.x;
+                const y = obs.y;
+
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 8;
+                ctx.fillStyle = 'rgba(100, 120, 140, 0.85)';
+                ctx.beginPath();
+                ctx.roundRect(x, y, obs.width, obs.height, 10);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                ctx.strokeStyle = 'rgba(180, 200, 220, 0.4)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.roundRect(x, y, obs.width, obs.height, 10);
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '12px "Segoe UI", system-ui, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 4;
+                ctx.fillText(obs.label, x + obs.width/2, y + obs.height/2);
+                ctx.shadowBlur = 0;
+            }
+
+            // Car – improved visual design
+            const carX = LANE_CENTERS[carLane] - CAR_WIDTH/2;
+            const carYPos = carY - CAR_HEIGHT/2;
+            const cx = carX + CAR_WIDTH/2;   // center x
+            const cy = carYPos + CAR_HEIGHT/2;
+
+            // Soft ground shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.beginPath();
+            ctx.ellipse(cx, carYPos + CAR_HEIGHT - 2, CAR_WIDTH*0.48, 7, 0, 0, Math.PI*2);
+            ctx.fill();
+
+            // Main body (sleek rounded shape, slightly tapered front)
+            const bodyGrad = ctx.createLinearGradient(carX, carYPos, carX + CAR_WIDTH, carYPos);
+            bodyGrad.addColorStop(0, '#1a6fd4');
+            bodyGrad.addColorStop(0.35, '#2e9af5');
+            bodyGrad.addColorStop(0.65, '#3aa8ff');
+            bodyGrad.addColorStop(1, '#1a6fd4');
+            ctx.fillStyle = bodyGrad;
+            ctx.shadowColor = 'rgba(30, 100, 200, 0.55)';
+            ctx.shadowBlur = 18;
+            ctx.beginPath();
+            // Custom car silhouette (front is top)
+            ctx.moveTo(carX + 8, carYPos + 4);                    // front-left
+            ctx.quadraticCurveTo(cx, carYPos - 2, carX + CAR_WIDTH - 8, carYPos + 4); // rounded nose
+            ctx.lineTo(carX + CAR_WIDTH - 3, carYPos + 14);
+            ctx.lineTo(carX + CAR_WIDTH - 1, carYPos + CAR_HEIGHT - 10);
+            ctx.quadraticCurveTo(carX + CAR_WIDTH - 1, carYPos + CAR_HEIGHT, carX + CAR_WIDTH - 10, carYPos + CAR_HEIGHT);
+            ctx.lineTo(carX + 10, carYPos + CAR_HEIGHT);
+            ctx.quadraticCurveTo(carX + 1, carYPos + CAR_HEIGHT, carX + 1, carYPos + CAR_HEIGHT - 10);
+            ctx.lineTo(carX + 3, carYPos + 14);
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Darker lower body / side skirts
+            ctx.fillStyle = 'rgba(10, 40, 90, 0.45)';
+            ctx.beginPath();
+            ctx.roundRect(carX + 2, carYPos + CAR_HEIGHT - 16, CAR_WIDTH - 4, 12, 5);
+            ctx.fill();
+
+            // Windshield (front glass)
+            const glassGrad = ctx.createLinearGradient(carX, carYPos + 6, carX, carYPos + 22);
+            glassGrad.addColorStop(0, 'rgba(180, 220, 255, 0.95)');
+            glassGrad.addColorStop(1, 'rgba(80, 140, 200, 0.7)');
+            ctx.fillStyle = glassGrad;
+            ctx.beginPath();
+            ctx.moveTo(carX + 10, carYPos + 8);
+            ctx.quadraticCurveTo(cx, carYPos + 4, carX + CAR_WIDTH - 10, carYPos + 8);
+            ctx.lineTo(carX + CAR_WIDTH - 12, carYPos + 20);
+            ctx.quadraticCurveTo(cx, carYPos + 24, carX + 12, carYPos + 20);
+            ctx.closePath();
+            ctx.fill();
+
+            // Roof / cabin
+            ctx.fillStyle = '#0d3a6e';
+            ctx.beginPath();
+            ctx.roundRect(carX + 11, carYPos + 22, CAR_WIDTH - 22, 14, 4);
+            ctx.fill();
+
+            // Thin highlight line on body
+            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(carX + 6, carYPos + 16);
+            ctx.lineTo(carX + 6, carYPos + CAR_HEIGHT - 14);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(carX + CAR_WIDTH - 6, carYPos + 16);
+            ctx.lineTo(carX + CAR_WIDTH - 6, carYPos + CAR_HEIGHT - 14);
+            ctx.stroke();
+
+            // Headlights
+            ctx.fillStyle = '#fff8c0';
+            ctx.shadowColor = 'rgba(255, 240, 150, 0.9)';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.roundRect(carX + 5, carYPos + 5, 9, 5, 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.roundRect(carX + CAR_WIDTH - 14, carYPos + 5, 9, 5, 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Taillights
+            ctx.fillStyle = '#ff3b3b';
+            ctx.shadowColor = 'rgba(255, 60, 60, 0.6)';
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.roundRect(carX + 6, carYPos + CAR_HEIGHT - 9, 8, 5, 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.roundRect(carX + CAR_WIDTH - 14, carYPos + CAR_HEIGHT - 9, 8, 5, 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Wheels (left & right)
+            ctx.fillStyle = '#1a1a1a';
+            // left front
+            ctx.beginPath();
+            ctx.roundRect(carX - 3, carYPos + 12, 7, 12, 3);
+            ctx.fill();
+            // left rear
+            ctx.beginPath();
+            ctx.roundRect(carX - 3, carYPos + CAR_HEIGHT - 24, 7, 12, 3);
+            ctx.fill();
+            // right front
+            ctx.beginPath();
+            ctx.roundRect(carX + CAR_WIDTH - 4, carYPos + 12, 7, 12, 3);
+            ctx.fill();
+            // right rear
+            ctx.beginPath();
+            ctx.roundRect(carX + CAR_WIDTH - 4, carYPos + CAR_HEIGHT - 24, 7, 12, 3);
+            ctx.fill();
+
+            // Wheel highlights
+            ctx.fillStyle = 'rgba(180,180,180,0.35)';
+            ctx.beginPath();
+            ctx.roundRect(carX - 1, carYPos + 14, 3, 8, 1);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.roundRect(carX - 1, carYPos + CAR_HEIGHT - 22, 3, 8, 1);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.roundRect(carX + CAR_WIDTH - 2, carYPos + 14, 3, 8, 1);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.roundRect(carX + CAR_WIDTH - 2, carYPos + CAR_HEIGHT - 22, 3, 8, 1);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+
+            // Sticky target word under car
+            ctx.fillStyle = '#f0f0f0';
+            ctx.font = 'bold 18px "Segoe UI", system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.shadowColor = 'rgba(0,0,0,0.9)';
+            ctx.shadowBlur = 10;
+            
+            const wordX = LANE_CENTERS[carLane];
+            const wordY = carYPos + CAR_HEIGHT + 6;
+            
+            const metrics = ctx.measureText(targetWord);
+            const textWidth = metrics.width;
+            const padding = 14;
+            const pillX = wordX - textWidth/2 - padding;
+            const pillY = wordY - 3;
+            const pillW = textWidth + padding * 2;
+            const pillH = 26;
+            
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.beginPath();
+            ctx.roundRect(pillX, pillY, pillW, pillH, 13);
+            ctx.fill();
+            
+            ctx.shadowColor = 'rgba(0,0,0,0.9)';
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 18px "Segoe UI", system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText(targetWord, wordX, wordY);
+            ctx.shadowBlur = 0;
+
+            // Overlays - Persian text
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0,0,0,0.75)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fcd9b0';
+                ctx.font = 'bold 34px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('اشتباه بود', canvas.width/2, canvas.height/2 - 18);
+                ctx.font = '18px sans-serif';
+                ctx.fillStyle = '#f0e0c0';
+                ctx.fillText('دوباره برو', canvas.width/2, canvas.height/2 + 34);
+            } else if (winFlag && waitingForNext) {
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#eafecc';
+                ctx.font = 'bold 32px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('✓ +۱', canvas.width/2, canvas.height/2 - 8);
+            }
+        }
+
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.moveTo(x + r, y);
+            this.lineTo(x + w - r, y);
+            this.quadraticCurveTo(x + w, y, x + w, y + r);
+            this.lineTo(x + w, y + h - r);
+            this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            this.lineTo(x + r, y + h);
+            this.quadraticCurveTo(x, y + h, x, y + h - r);
+            this.lineTo(x, y + r);
+            this.quadraticCurveTo(x, y, x + r, y);
+            this.closePath();
+            return this;
+        };
+
+        // ---------- game loop ----------
+        function gameLoop() {
+            if (!gameOver && !waitingForNext) {
+                updateObstacles();
+                checkCollision();
+            }
+
+            if (winFlag && waitingForNext && !gameOver) {
+                spawnNewRound();
+                winFlag = false;
+                waitingForNext = false;
+                if (!gameOver) {
+                    startMusic();
+                }
+            }
+
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ---------- swipe ----------
+        function handleSwipe(direction) {
+            if (gameOver || winFlag || waitingForNext) return;
+            if (direction === 'left' && carLane > 0) {
+                carLane--;
+                soundMove();
+            } else if (direction === 'right' && carLane < 2) {
+                carLane++;
+                soundMove();
+            }
+        }
+
+        // ---------- events ----------
+        function setupEvents() {
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                if (!gameOver && !winFlag) {
+                    startMusic();
+                }
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                isSwiping = true;
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isSwiping || gameOver || winFlag || waitingForNext) return;
+                const touch = e.touches[0];
+                const dx = touch.clientX - touchStartX;
+                const dy = touch.clientY - touchStartY;
+                if (Math.abs(dx) > 25 && Math.abs(dx) > Math.abs(dy) * 0.7) {
+                    if (dx > 0) handleSwipe('right');
+                    else handleSwipe('left');
+                    isSwiping = false;
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                isSwiping = false;
+            }, { passive: false });
+
+            let mouseDownX = 0;
+            canvas.addEventListener('mousedown', (e) => {
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                if (!gameOver && !winFlag) {
+                    startMusic();
+                }
+                mouseDownX = e.clientX;
+            });
+            canvas.addEventListener('mouseup', (e) => {
+                if (gameOver || winFlag || waitingForNext) return;
+                const dx = e.clientX - mouseDownX;
+                if (Math.abs(dx) > 25) {
+                    if (dx > 0) handleSwipe('right');
+                    else handleSwipe('left');
+                }
+            });
+
+            document.getElementById('resetButton').addEventListener('click', () => {
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                resetGame();
+                if (!gameOver && !winFlag) {
+                    startMusic();
+                }
+            });
+
+            canvas.addEventListener('click', (e) => {
+                if (gameOver) {
+                    initAudio();
+                    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                    resetGame();
+                    if (!gameOver && !winFlag) {
+                        startMusic();
+                    }
+                }
+            });
+
+            // Email button
+            emailBtn.addEventListener('click', () => {
+                emailPopup.classList.toggle('show');
+                setTimeout(() => {
+                    emailPopup.classList.remove('show');
+                }, 5000);
+            });
+        }
+
+        // ---------- start ----------
+        resetGame();
+        setupEvents();
+        setTimeout(() => {
+            if (!gameOver && !winFlag) {
+                startMusic();
+            }
+        }, 500);
+        gameLoop();
+    })();
+</script>
+</body>
+</html>
