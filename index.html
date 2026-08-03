@@ -43,7 +43,6 @@
             padding-bottom: 1rem;
         }
         .game-card {
-            background: #0f3460;
             border-radius: 1.5rem;
             padding: 1.5rem;
             margin-bottom: 1.2rem;
@@ -78,13 +77,19 @@
             font-size: 0.85rem;
             margin-top: 4px;
         }
+        .game-card.synonym {
+            background: #2a1a3a;
+            border-color: #5a2a7a;
+        }
+        .game-card.synonym:hover {
+            border-color: #8a4aaa;
+        }
         .game-card.snake {
             background: #1a3a2a;
             border-color: #2a6a4a;
         }
-        .game-card.synonym {
-            background: #2a1a3a;
-            border-color: #5a2a7a;
+        .game-card.snake:hover {
+            border-color: #4aaa6a;
         }
         .footer-text {
             color: #555577;
@@ -99,16 +104,18 @@
         <div class="menu-title">🎮 بازی‌های من</div>
         <div class="menu-subtitle">یکی رو انتخاب کن</div>
 
-        <a href="snake.html" class="game-card snake">
-            <span class="icon">🐍</span>
-            <div class="name">بازی مار</div>
-            <div class="desc">بازی کلاسیک مار با گرافیک زیبا</div>
-        </a>
-
+        <!-- Synonym Game - First (Top) -->
         <a href="synonym.html" class="game-card synonym">
             <span class="icon">📚</span>
             <div class="name">کلمات مترادف</div>
             <div class="desc">کلمه درست رو پیدا کن و امتیاز بگیر</div>
+        </a>
+
+        <!-- Snake Game - Second (Bottom) -->
+        <a href="snake.html" class="game-card snake">
+            <span class="icon">🐍</span>
+            <div class="name">بازی مار</div>
+            <div class="desc">بازی کلاسیک مار با گرافیک زیبا</div>
         </a>
 
         <div class="footer-text">💡 ساخته شده با ❤️ توسط Ehsan</div>
